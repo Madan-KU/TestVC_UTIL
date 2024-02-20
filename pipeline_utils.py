@@ -1,6 +1,8 @@
 __version__ = "0.0.1"
 
 # Standard library imports
+import requests
+import re
 import datetime
 import json
 import logging
@@ -37,7 +39,76 @@ GREEN = '\033[92m'
 RED = '\033[91m'
 RESET = '\033[0m'
 
-def install_libraries():
+
+# def Check_Version():
+#     local_version = __version__
+#     github_url = "https://raw.githubusercontent.com/Madan-KU/TestVC_UTIL/main/pipeline_utils.py"
+#     try:
+#         response = requests.get(github_url)
+#         response.raise_for_status()
+#         script_content = response.text
+#         version_pattern = r"__version__\s*=\s*[\"'](\d+\.\d+\.\d+)[\"']"
+#         match = re.search(version_pattern, script_content)
+#         if match:
+#             latest_version = match.group(1)
+#             if latest_version != local_version:
+#                 print("New version available: {}".format(latest_version))
+#             else:
+#                 print("You have the latest version: {}".format(local_version))
+#         else:
+#             print("Couldn't find version information in the script.")
+#     except requests.exceptions.RequestException as e:
+#         print("Error occurred while fetching script:", e)
+
+
+def Check_Version():
+    class VersionChecker:
+        def __init__(self, local_version):
+            github_url = "https://raw.githubusercontent.com/Madan-KU/TestVC_UTIL/main/pipeline_utils.py"
+            self.local_version = local_version
+            self.github_url = github_url
+
+        def fetch_script_content(self):
+            try:
+                response = requests.get(self.github_url)
+                response.raise_for_status()
+                return response.text
+            except requests.exceptions.RequestException as e:
+                print("Error occurred while fetching script:", e)
+                return None
+
+        def check_version(self):
+            script_content = self.fetch_script_content()
+            if script_content is None:
+                return
+
+            version_pattern = r"__version__\s*=\s*[\"'](\d+\.\d+\.\d+)[\"']"
+            match = re.search(version_pattern, script_content)
+            if match:
+                latest_version = match.group(1)
+                print("Local version: {}".format(self.local_version))
+                print("Latest version on GitHub: {}".format(latest_version))
+
+                if latest_version != self.local_version:
+                    print("New version available: {}".format(latest_version))
+                    self.update_script(script_content)
+                else:
+                    print("You have the latest version.")
+            else:
+                print("Couldn't find version information in the script.")
+
+        def update_script(self, new_content):
+            try:
+                with open("utils.py", "w") as f:
+                    f.write(new_content)
+                print("utils.py has been updated successfully.")
+            except Exception as e:
+                print("Error occurred while updating utils.py:", e)
+
+    version_checker = VersionChecker(__version__)
+    version_checker.check_version()
+
+def Install_Libraries():
     def colored_print(message, color):
         print(f"{color}{message}{RESET}")
 
